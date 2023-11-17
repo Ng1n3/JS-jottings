@@ -131,7 +131,71 @@ console.log(typeof mywrappedSymbol) // object
 
 #### Using global Symbl Registry
 In scenarios where different parts of the runtime would like to share and reuse a symbol instance, it is
-possible to create and reuse symbols in a string-keyed global symbol registry
+possible to create and reuse symbols in a string-keyed global symbol registry.
 
+The global registy require sting keys.
 
+Symbols defined in the global registry are totally distinct from symbols created using Symbol(), even
+if they share a description
+```
+let fooGlobalsymbol = Symbol.for('foo');
+let otherFooGlobalSymbol = Symbol.for('foo');
+console.log(fooGlobalsymbol === otherFooGlobalSymbol) //true
+
+let emptyGlobalSymbol = Symbol.for();
+console.log(emptyGlobalSymbol) // undefined
+
+let localSymbol = Symbol('foo');
+let globalSymbol = Symbol.for('foo');
+console.log(localSymbol === globalSymbol); // false
+
+// Create global symbol
+let s = Symbol.for('foo');
+console.log(Symbol.keyFor(s)); // foo
+// Create regular symbol
+let s2 = Symbol('bar');
+console.log(Symbol.keyFor(s2)); // undefined
+```
+
+#### Using symbols as Properties
+```
+let s1 = Symbol('foo'),
+s2 = Symbol('bar'),
+s3 = Symbol('baz'),
+s4 = Symbol('qux');
+let o = {
+[s1]: 'foo val'
+};
+// Also valid: o[s1] = 'foo val';
+console.log(o);
+// {Symbol{foo}: foo val}
+Object.defineProperty(o, s2, {value: 'bar val'});
+console.log(o);
+// {Symbol{foo}: foo val, Symbol(bar): bar val}
+Object.defineProperties(o, {
+[s3]: {value: 'baz val'},
+[s4]: {value: 'qux val'}
+});
+console.log(o);
+// {Symbol{foo}: foo val, Symbol(bar): bar val,
+// Symbol{baz}: baz val, Symbol(qux): qux val}
+
+let s1 = Symbol('foo'),
+s2 = Symbol('bar');
+let o = {
+[s1]: 'foo val',
+[s2]: 'bar val',
+baz: 'baz val',
+qux: 'qux val'
+};
+
+console.log(Object.getOwnPropertySymbols(o));
+// [Symbol(foo), Symbol(bar)]
+console.log(Object.getOwnPropertyNames(o));
+// ["baz", "qux"]
+console.log(Object.getOwnPropertyDescriptors(o));
+// {baz: {...}, qux: {...}, Symbol(foo): {...}, Symbol(bar): {...}}
+console.log(Reflect.ownKeys(o));
+// ["baz", "qux", Symbol(foo), Symbol(bar)]
+```
 
